@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DL-Ops Lab Assignment-1 | Yogesh Sharma (B22CH045)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #24292e;
+            background-color: #ffffff;
+            max-width: 1012px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 0.5em;
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+        }
+        h2 {
+            font-size: 1.5em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+        }
+        h3 {
+            font-size: 1.25em;
+            margin-top: 20px;
+            margin-bottom: 12px;
+        }
+        h4 {
+            font-size: 1em;
+            margin-top: 16px;
+            margin-bottom: 8px;
+        }
+        p {
+            margin-bottom: 16px;
+        }
+        ul, ol {
+            margin-bottom: 16px;
+            padding-left: 30px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 16px;
+            display: block;
+            overflow-x: auto;
+        }
+        table thead {
+            background-color: #f6f8fa;
+        }
+        table th, table td {
+            border: 1px solid #dfe2e5;
+            padding: 6px 13px;
+            text-align: left;
+        }
+        table th {
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+            border: 1px solid #e1e4e8;
+            border-radius: 3px;
+        }
+        hr {
+            height: 0.25em;
+            padding: 0;
+            margin: 24px 0;
+            background-color: #e1e4e8;
+            border: 0;
+        }
+        code {
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            background-color: rgba(27,31,35,0.05);
+            border-radius: 3px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+        .header-info {
+            margin-bottom: 24px;
+            color: #586069;
+        }
+        .header-info strong {
+            color: #24292e;
+        }
+    </style>
+</head>
+<body>
+    <h1>DL-Ops Lab Assignment-1</h1>
+    
+    <div class="header-info">
+        <p><strong>Author:</strong> Yogesh Sharma (B22CH045)<br>
+        <strong>Course:</strong> CSL7210 ML-DL-Ops</p>
+    </div>
+
+    <h2>Overview</h2>
+    <p>This assignment presents a comprehensive analysis of deep learning models trained on MNIST and FashionMNIST datasets. The study evaluates ResNet-18 and ResNet-50 architectures with various hyperparameter configurations, compares their performance with SVM classifiers, and analyzes computational efficiency differences between CPU and GPU implementations.</p>
+
+    <h2>Experimental Setup</h2>
+    
+    <h3>Datasets</h3>
+    <ul>
+        <li><strong>MNIST</strong>: 70,000 grayscale images of handwritten digits (0-9), 28×28 pixels</li>
+        <li><strong>FashionMNIST</strong>: 70,000 grayscale images of fashion items across 10 categories, 28×28 pixels</li>
+        <li>Both datasets resized to 32×32 pixels and converted to 3-channel format</li>
+        <li><strong>Data Split</strong>: 70% train, 10% validation, 20% test</li>
+    </ul>
+
+    <h3>Models</h3>
+    <ul>
+        <li>ResNet-18 (pretrained=False)</li>
+        <li>ResNet-50 (pretrained=False)</li>
+    </ul>
+
+    <h3>Hyperparameters</h3>
+    <ul>
+        <li><strong>Batch sizes</strong>: 16, 32</li>
+        <li><strong>Optimizers</strong>: SGD (momentum=0.9), Adam</li>
+        <li><strong>Learning rates</strong>: 0.001, 0.0001</li>
+        <li><strong>Epochs</strong>: 5 and 10</li>
+        <li><strong>AMP</strong>: Enabled (USE_AMP=True) for all experiments</li>
+    </ul>
+
+    <hr>
+
+    <h2>Question 1(a): ResNet Training on MNIST and FashionMNIST</h2>
+
+    <h3>Results</h3>
+
+    <h4>Table 1: Test Classification Accuracy (%) for MNIST Dataset</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Batch Size</th>
+                <th>Optimizer</th>
+                <th>Learning Rate</th>
+                <th>ResNet-18</th>
+                <th>ResNet-50</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>16</td><td>SGD</td><td>0.001</td><td>98.92</td><td>98.57</td></tr>
+            <tr><td>16</td><td>SGD</td><td>0.0001</td><td>98.87</td><td>97.79</td></tr>
+            <tr><td>16</td><td>Adam</td><td>0.001</td><td>98.95</td><td>98.69</td></tr>
+            <tr><td>16</td><td>Adam</td><td>0.0001</td><td>98.92</td><td>98.06</td></tr>
+            <tr><td>32</td><td>SGD</td><td>0.001</td><td>99.04</td><td>98.51</td></tr>
+            <tr><td>32</td><td>SGD</td><td>0.0001</td><td>98.43</td><td>96.61</td></tr>
+            <tr><td>32</td><td>Adam</td><td>0.001</td><td>98.93</td><td>97.98</td></tr>
+            <tr><td>32</td><td>Adam</td><td>0.0001</td><td>98.89</td><td>97.43</td></tr>
+        </tbody>
+    </table>
+
+    <h4>Table 2: Test Classification Accuracy (%) for FashionMNIST Dataset</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Batch Size</th>
+                <th>Optimizer</th>
+                <th>Learning Rate</th>
+                <th>ResNet-18</th>
+                <th>ResNet-50</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>16</td><td>SGD</td><td>0.001</td><td>90.55</td><td>88.51</td></tr>
+            <tr><td>16</td><td>SGD</td><td>0.0001</td><td>89.66</td><td>84.71</td></tr>
+            <tr><td>16</td><td>Adam</td><td>0.001</td><td>90.67</td><td>87.26</td></tr>
+            <tr><td>16</td><td>Adam</td><td>0.0001</td><td>90.21</td><td>88.36</td></tr>
+            <tr><td>32</td><td>SGD</td><td>0.001</td><td>89.22</td><td>87.69</td></tr>
+            <tr><td>32</td><td>SGD</td><td>0.0001</td><td>88.43</td><td>83.82</td></tr>
+            <tr><td>32</td><td>Adam</td><td>0.001</td><td>90.37</td><td>77.94</td></tr>
+            <tr><td>32</td><td>Adam</td><td>0.0001</td><td>90.86</td><td>87.70</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Loss Curves</h3>
+
+    <h4>MNIST Loss Curves</h4>
+    <img src="image2.png" alt="MNIST Loss Curves">
+    <p>The loss curves for MNIST show that ResNet-18 consistently achieves lower training loss than ResNet-50 across all hyperparameter configurations. Both models show rapid loss reduction in the first epoch, with ResNet-18 reaching lower final loss values (approximately 0.01-0.05) compared to ResNet-50 (approximately 0.03-0.12).</p>
+
+    <h4>FashionMNIST Loss Curves</h4>
+    <img src="image1.png" alt="FashionMNIST Loss Curves">
+    <p>The loss curves for FashionMNIST reveal that ResNet-18 consistently achieves lower training loss (final loss around 0.22-0.30) compared to ResNet-50 (final loss around 0.32-0.50). ResNet-50 starts with higher initial loss and converges more slowly, particularly with lower learning rates. The most dramatic difference is observed with batch size 32, SGD, and learning rate 0.0001, where ResNet-50 starts at approximately 1.18 loss compared to ResNet-18's 0.65.</p>
+
+    <h3>Key Findings</h3>
+    <ul>
+        <li><strong>ResNet-18 consistently outperforms ResNet-50</strong> on both datasets</li>
+        <li><strong>MNIST</strong>: ResNet-18 achieves 98.43%-99.04% accuracy; ResNet-50 achieves 96.61%-98.69%</li>
+        <li><strong>FashionMNIST</strong>: ResNet-18 achieves 88.43%-90.86% accuracy; ResNet-50 achieves 77.94%-88.51%</li>
+        <li><strong>Best Performance</strong>: 
+            <ul>
+                <li>MNIST: 99.04% (ResNet-18, batch size 32, SGD, LR 0.001)</li>
+                <li>FashionMNIST: 90.86% (ResNet-18, batch size 32, Adam, LR 0.0001)</li>
+            </ul>
+        </li>
+        <li>All configurations achieve above 80% accuracy on FashionMNIST and above 97% on MNIST</li>
+        <li><strong>Loss Curve Insights</strong>: 
+            <ul>
+                <li>ResNet-18 shows faster convergence and lower final loss values</li>
+                <li>Lower learning rates result in slower convergence, particularly for ResNet-50</li>
+                <li>FashionMNIST presents more optimization challenges, reflected in higher loss values</li>
+            </ul>
+        </li>
+    </ul>
+
+    <hr>
+
+    <h2>Question 1(b): SVM Classification</h2>
+
+    <h3>Results</h3>
+
+    <h4>Table 3: SVM Classification Results</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Dataset</th>
+                <th>Kernel</th>
+                <th>Test Accuracy (%)</th>
+                <th>Training Time (ms)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>MNIST</td><td>poly</td><td>97.99</td><td>443,644</td></tr>
+            <tr><td>MNIST</td><td>rbf</td><td>97.89</td><td>661,262</td></tr>
+            <tr><td>FashionMNIST</td><td>poly</td><td>89.50</td><td>844,565</td></tr>
+            <tr><td>FashionMNIST</td><td>rbf</td><td>88.87</td><td>952,153</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Key Findings</h3>
+    <ul>
+        <li><strong>SVM Performance</strong>: Competitive with deep learning models (88.87%-97.99%)</li>
+        <li><strong>Polynomial kernel</strong> slightly outperforms RBF kernel on both datasets</li>
+        <li><strong>Training times</strong>: Significantly longer than deep learning models (7-16 minutes vs. seconds/minutes on GPU)</li>
+        <li>ResNet-18 achieves higher accuracy than SVM on both datasets</li>
+    </ul>
+
+    <hr>
+
+    <h2>Question 2: CPU vs. GPU Performance Analysis</h2>
+
+    <h3>Results</h3>
+
+    <h4>Table 4: Hardware Performance Comparison on FashionMNIST Dataset</h4>
+    <table>
+        <thead>
+            <tr>
+                <th>Compute</th>
+                <th>BS</th>
+                <th>Optimizer</th>
+                <th>LR</th>
+                <th colspan="2">Test Accuracy (%)</th>
+                <th colspan="2">Train Time (ms)</th>
+                <th colspan="2">FLOPs</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th>R18</th>
+                <th>R50</th>
+                <th>R18</th>
+                <th>R50</th>
+                <th>R18</th>
+                <th>R50</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td>CPU</td><td>16</td><td>SGD</td><td>0.001</td><td>85.94</td><td>83.16</td><td>578,479</td><td>1,381,111</td><td>37.2M</td><td>84.3M</td></tr>
+            <tr><td>CPU</td><td>16</td><td>Adam</td><td>0.001</td><td>87.40</td><td>82.98</td><td>816,487</td><td>1,758,394</td><td>37.2M</td><td>84.3M</td></tr>
+            <tr><td>GPU</td><td>16</td><td>SGD</td><td>0.001</td><td>86.99</td><td>81.93</td><td>43,956</td><td>75,700</td><td>37.2M</td><td>84.3M</td></tr>
+            <tr><td>GPU</td><td>16</td><td>Adam</td><td>0.001</td><td>85.13</td><td>80.60</td><td>44,321</td><td>87,726</td><td>37.2M</td><td>84.3M</td></tr>
+        </tbody>
+    </table>
+    <p><strong>Note:</strong> R18 = ResNet-18, R50 = ResNet-50</p>
+
+    <h3>Key Findings</h3>
+    <ul>
+        <li><strong>GPU Speedup</strong>: 13-20x faster than CPU
+            <ul>
+                <li>ResNet-18: ~13.2x (SGD), ~18.4x (Adam)</li>
+                <li>ResNet-50: ~18.2x (SGD), ~20.0x (Adam)</li>
+            </ul>
+        </li>
+        <li><strong>Accuracy</strong>: Minimal differences between CPU and GPU (within 0.5-2.3 percentage points)</li>
+        <li><strong>FLOPs</strong>: 
+            <ul>
+                <li>ResNet-18: 37,220,352 FLOPs</li>
+                <li>ResNet-50: 84,342,784 FLOPs (2.27x more than ResNet-18)</li>
+            </ul>
+        </li>
+        <li><strong>Training Time Correlation</strong>: Training time scales approximately linearly with FLOP count on GPU</li>
+    </ul>
+
+    <hr>
+
+    <h2>Overall Conclusions</h2>
+    <ol>
+        <li><strong>ResNet-18 Superiority</strong>: Consistently outperforms ResNet-50 with lower computational cost</li>
+        <li><strong>Task Difficulty</strong>: FashionMNIST is more challenging than MNIST (8-10% accuracy drop)</li>
+        <li><strong>GPU Acceleration</strong>: Essential for efficient training (13-20x speedup with minimal accuracy impact)</li>
+        <li><strong>SVM Competitiveness</strong>: Achieves competitive accuracy but requires significantly longer training times</li>
+        <li><strong>Hyperparameter Robustness</strong>: Both ResNet models are robust to hyperparameter variations</li>
+    </ol>
+
+    <hr>
+
+    <h2>Files</h2>
+    <ul>
+        <li><code>B22CH045_Yogesh_Sharma_Ass1_1.ipynb</code>: Main experiment notebook (Q1a, Q1b)</li>
+        <li><code>B22CH045_Yogesh_Shamra_Ass1_2.ipynb</code>: Hardware comparison notebook (Q2)</li>
+        <li><code>B22CH045_Yogesh_Sharma_Ass1.pdf</code>: Complete Assignment report</li>
+        <li><code>image1.png</code>: FashionMNIST loss curves</li>
+        <li><code>image2.png</code>: MNIST loss curves</li>
+    </ul>
+</body>
+</html>
+
