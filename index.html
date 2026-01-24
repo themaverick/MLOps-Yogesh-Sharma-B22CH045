@@ -99,6 +99,40 @@
         .header-info strong {
             color: #24292e;
         }
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .report-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0366d6;
+            color: white;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .report-link:hover {
+            background-color: #0256cc;
+            text-decoration: none;
+        }
+        .learning-section {
+            background-color: #f6f8fa;
+            border-left: 4px solid #0366d6;
+            padding: 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+        .best-model {
+            background-color: #fff4e6;
+            border-left: 4px solid #ff9800;
+            padding: 20px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -106,11 +140,26 @@
     
     <div class="header-info">
         <p><strong>Author:</strong> Yogesh Sharma (B22CH045)<br>
-        <strong>Course:</strong> CSL7210 ML-DL-Ops</p>
+        <strong>Course:</strong> CSL7210 ML-DL-Ops<br>
+        <strong>Email:</strong> <a href="mailto:b22ch045@iitj.ac.in">b22ch045@iitj.ac.in</a></p>
+    </div>
+
+    <div style="margin: 20px 0;">
+        <a href="B22CH045_Yogesh_Sharma_Ass1.pdf" class="report-link" target="_blank">📄 Download Complete Assignment Report (PDF)</a>
     </div>
 
     <h2>Overview</h2>
     <p>This assignment presents a comprehensive analysis of deep learning models trained on MNIST and FashionMNIST datasets. The study evaluates ResNet-18 and ResNet-50 architectures with various hyperparameter configurations, compares their performance with SVM classifiers, and analyzes computational efficiency differences between CPU and GPU implementations.</p>
+
+    <div class="best-model">
+        <h3>🏆 Best Model Analysis</h3>
+        <p><strong>ResNet-18</strong> emerges as the optimal choice for both MNIST and FashionMNIST datasets. On MNIST, it achieves 99.04% accuracy (batch size 32, SGD, LR 0.001), while on FashionMNIST, it reaches 90.86% accuracy (batch size 32, Adam, LR 0.0001). Despite being shallower, ResNet-18 consistently outperforms ResNet-50 by 1-12 percentage points, demonstrating that deeper networks don't always guarantee better performance. The model's efficiency is further highlighted by its 2.27x fewer FLOPs and faster training times, making it the ideal balance between accuracy and computational cost.</p>
+    </div>
+
+    <div class="learning-section">
+        <h3>💡 Key Learnings from this Assignment</h3>
+        <p>This assignment provided valuable insights into deep learning model selection and optimization. I learned that <strong>deeper networks are not always better</strong>—ResNet-18's superior performance demonstrates that architecture depth must be matched to task complexity. The experiments revealed the critical importance of <strong>hyperparameter tuning</strong>, with learning rates and optimizers significantly impacting model convergence and final accuracy. Additionally, the CPU vs GPU comparison highlighted that <strong>GPU acceleration is essential for practical deep learning workflows</strong>, providing 13-20x speedup with minimal accuracy trade-offs. The loss curve analysis taught me to interpret training dynamics and identify optimization challenges early in the training process.</p>
+    </div>
 
     <h2>Experimental Setup</h2>
     
@@ -327,7 +376,7 @@
     <ul>
         <li><code>B22CH045_Yogesh_Sharma_Ass1_1.ipynb</code>: Main experiment notebook (Q1a, Q1b)</li>
         <li><code>B22CH045_Yogesh_Shamra_Ass1_2.ipynb</code>: Hardware comparison notebook (Q2)</li>
-        <li><code>B22CH045_Yogesh_Sharma_Ass1.pdf</code>: Complete Assignment report</li>
+        <li><a href="B22CH045_Yogesh_Sharma_Ass1.pdf" target="_blank"><code>B22CH045_Yogesh_Sharma_Ass1.pdf</code></a>: Complete Assignment report</li>
         <li><code>image1.png</code>: FashionMNIST loss curves</li>
         <li><code>image2.png</code>: MNIST loss curves</li>
     </ul>
