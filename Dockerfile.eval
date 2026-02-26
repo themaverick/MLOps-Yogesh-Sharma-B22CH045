@@ -1,0 +1,22 @@
+# Task 9: Production image - pull model from HF and run evaluation on startup
+# Build: docker build -f Dockerfile.eval -t goodreads-eval .
+# Run:   docker run --env-file .env -v $(pwd):/app/out goodreads-eval
+# Output: evaluation_results.json in mounted volume (e.g. $(pwd))
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY src/ src/
+ENV PYTHONPATH=/app
+
+# Pull model from Hugging Face (themaverick1/goodreads-genre-classifier) and run evaluation
+# HF_TOKEN must be provided via --env-file .env
+ENV EVAL_OUTPUT_DIR=/app/out
+RUN mkdir -p /app/out
+
+# Use smaller data for faster eval in container; omit --max-test-samples for full eval
+CMD ["sh", "-c", "python -m src.eval --model-path themaverick1/goodreads-genre-classifier --output /app/out/evaluation_results.json --head 2000 --sample 400 --train-per-genre 300 --test-per-genre 100 && cat /app/out/evaluation_results.json"]
