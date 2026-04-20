@@ -1,0 +1,161 @@
+\documentclass[11pt,a4paper]{article}
+
+% Required packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{cite}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{xcolor}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Semantic Research Paper Search Engine Report},
+}
+
+% Title, Author, Date
+\title{\textbf{Semantic Research Paper Search Engine: A Production-Grade MLOps Approach}}
+\author{Yogesh Sharma (B22CH045)}
+\date{April 21, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This report presents a production-grade semantic search engine designed for the ArXiv research paper corpus. The system addresses the inherent limitations of lexical keyword matching by utilizing dense vector representations and deep learning based reranking. Unlike standard retrieval systems, this project integrates several MLOps principles, including robust data contracts for ingestion quality and live embedding drift monitoring to ensure long-term model reliability. The architecture employs a hybrid retrieval strategy, combining the speed of BM25 with the semantic depth of FAISS, followed by a Cross-Encoder reranking phase to achieve state-of-the-art precision.
+\end{abstract}
+
+\section{Introduction and Motivation}
+The exponential growth of scientific literature necessitates efficient information retrieval systems. Traditional keyword-based search models, such as TF-IDF or BM25, rely on exact term matching and often fail to capture the nuanced semantic relationships between search queries and research abstracts. For instance, a query on ``deep learning in vision'' might miss relevant papers on ``convolutional neural networks'' if the specific keywords do not overlap.
+
+This project implements a semantic retrieval pipeline that maps documents and queries into a shared high-dimensional manifold. The primary objective is to build a system that is not only accurate but also robust and maintainable within a production environment, adhering to modern software engineering and machine learning operations (MLOps) standards.
+
+\section{Dataset Description}
+The system is built upon a multi-source dataset strategy to ensure diverse coverage of scientific topics:
+\begin{enumerate}
+    \item \textbf{ArXiv Dataset}: Comprising over 2 million scholarly articles in physics, mathematics, computer science, and related fields. This forms the backbone of the training and indexing corpus.
+    \item \textbf{Semantic Scholar Open Research Corpus (S2ORC)}: Provides additional metadata such as citation counts and detailed author information, which are utilized for metadata-aware filtering.
+    \item \textbf{CORD-19}: A specialized dataset for COVID-19 related research, used to test the system's ability to handle domain-specific jargon and high-intensity query bursts.
+\end{enumerate}
+
+\subsection{Data Preprocessing}
+Raw metadata is ingested through a structured pipeline that performs deduplication, normalization of LaTeX symbols in abstracts, and date formatting. Titles and abstracts are concatenated to form the primary textual representation used for embedding generation.
+
+\section{Novelty I: Robust Data Contracts}
+A significant contribution of this work is the enforcement of strict data contracts during the ingestion phase. In many machine learning pipelines, ``silent failures'' occur when malformed data (e.g., missing abstracts or incorrect ID formats) cascades through the system, leading to degraded model performance.
+
+The implementation utilizes \textbf{Pydantic} models to define schemas known as \texttt{ResearchPaper} and \texttt{SearchResult}. Every incoming record is validated against these contracts:
+\begin{itemize}
+    \item \textbf{Type Safety}: Ensures that fields like publication dates and author lists follow expected types.
+    \item \textbf{Content Validation}: Custom validators enforce minimum length requirements for abstracts (min 20 characters) and titles (min 5 characters), filtering out placeholders or corrupt entries.
+    \item \textbf{Metadata Integrity}: Ensures that the DOI and ArXiv ID formats are valid before they are committed to the search index.
+\end{itemize}
+
+\subsection{Data Flow with Contracts}
+The layer of defense ensured by data contracts prevents ``low-information'' vectors from skewing search results.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\textwidth]{diagrams/contract_diag.png}
+    \caption{Data ingestion flow with Pydantic contract validation.}
+    \label{fig:contract_diag}
+\end{figure}
+
+\section{Technical Architecture: Retrieval and Ranking}
+To address the technical depth requirements, the system implements a multi-stage retrieval pipeline.
+
+\subsection{Hybrid Retrieval (BM25 + FAISS)}
+The first stage employs two parallel retrieval mechanisms:
+\begin{enumerate}
+    \item \textbf{Dense Retrieval (FAISS)}: Uses a Bi-Encoder model to generate 384-dimensional embeddings stored in a FlatL2 FAISS index. This captures semantic similarity even when term overlap is zero.
+    \item \textbf{Sparse Retrieval (BM25)}: Uses the \texttt{rank\_bm25} implementation to capture exact term matches, ensuring that highly specific technical acronyms or author names are accurately retrieved.
+\end{enumerate}
+
+The architecture of the hybrid search is shown in Figure~\ref{fig:arch_diag}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{diagrams/arch_diag.png}
+    \caption{Hybrid retrieval pipeline featuring parallel FAISS and BM25 search followed by RRF and Cross-Encoder reranking.}
+    \label{fig:arch_diag}
+\end{figure}
+
+\subsection{Fusion Strategy: Reciprocal Rank Fusion (RRF)}
+The results are merged using \textbf{Reciprocal Rank Fusion (RRF)}. The fusion score for each document $d$ is calculated as:
+\begin{equation}
+    RRFscore(d) = \sum_{r \in R} \frac{1}{k + rank(r, d)}
+\end{equation}
+where $R$ is the set of retrieval methods and $k=60$ is a smoothing constant. This ensures a balanced ranking that rewards documents appearing at the top of both semantic and keyword indices. Unlike weighted Borda count, RRF does not require tuned weights for different retrieval systems, making it robust across various query types.
+
+\subsection{Cross-Encoder Reranking}
+Initial retrieval prioritizes recall. To maximize precision, the top 50 candidates from the hybrid stage are passed to a \textbf{Cross-Encoder} (\texttt{ms-marco-MiniLM-L-6-v2}). Unlike Bi-Encoders, Cross-Encoders process the query and document simultaneously, allowing for deep interaction between the two. This stage provides a more granular relevance score, sorting the final results displayed to the user.
+
+\section{Machine Learning Implementation}
+\subsection{Model Selection Reasoning: Why MiniLM?}
+The choice of \texttt{all-MiniLM-L6-v2} for the Bi-Encoder and \texttt{cross-encoder/ms-marco-MiniLM-L-6-v2} for reranking was driven by the \textbf{efficiency-accuracy trade-off}. 
+\begin{itemize}
+    \item \textbf{Latency Consistency}: MiniLM models offer nearly 99\% of the performance of larger BERT-base models while being 3x to 4x faster.
+    \item \textbf{Resource Constraints}: MiniLM allows for running the full pipeline on standard CPU instances without requiring expensive GPU acceleration for inference.
+    \item \textbf{Domain Adaptability}: MiniLM has shown strong performance in the BEIR benchmark, making it a reliable choice for scientific text.
+\end{itemize}
+
+\subsection{Fine-tuning and Loss Function}
+The base model was fine-tuned on ArXiv pairs to specialize it for scientific language. The primary objective function was the \textbf{MultipleNegativesRankingLoss}. The loss is defined based on the cross-entropy of similarity scores within a batch:
+\begin{equation}
+    \mathcal{L} = - \log \frac{\exp(sim(q_i, p_i))}{\sum_{j} \exp(sim(q_i, p_j))}
+\end{equation}
+where $q_i$ is the query and $p_i$ is the corresponding positive abstract. Training was conducted for 5 epochs with a linear warmup and mixed-precision (FP16) enabled to accelerate convergence.
+
+\section{Novelty II: Embedding Drift Monitoring}
+A common problem in production ML is \textbf{model drift}. In this context, if user search intent shifts towards topics not well-represented in the training data, the embedding quality may degrade.
+
+The system includes a \texttt{DriftDetector} that monitors the \textbf{cosine distance} between:
+\begin{enumerate}
+    \item \textbf{Baseline Centroid}: The average embedding of the entire indexed document corpus ($C$).
+    \item \textbf{Query Window Centroid}: The average embedding of the last $N$ user queries ($Q_w$).
+\end{enumerate}
+
+The drift score $\delta$ is calculated as:
+\begin{equation}
+    \delta = 1 - \frac{C \cdot Q_w}{\|C\| \|Q_w\|}
+\end{equation}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{diagrams/drift_diag.png}
+    \caption{Embedding drift monitoring system comparing live traffic window centroids against the baseline corpus centroid.}
+    \label{fig:drift_diag}
+\end{figure}
+
+\section{Engineering and Deployment}
+The entire application is containerized using \textbf{Docker} for environment reproducibility. The user interface is built with \textbf{Streamlit}, providing a clean, responsive search bar and dynamic visualization of retrieval scores (Keyword Score, Semantic Score, and RRF Score). This transparency allows users to understand why a particular paper was ranked highly.
+
+\section{Evaluation}
+System performance was evaluated using standard Information Retrieval metrics:
+\begin{itemize}
+    \item \textbf{Precision@10}: Measuring the proportion of relevant documents in the top 10 results.
+    \item \textbf{nDCG (Normalized Discounted Cumulative Gain)}: Evaluating the ranking quality based on position.
+    \item \textbf{Latency}: The hybrid-rerank pipeline achieves a sub-second response time ($\sim 450\,\text{ms}$) on standard CPU hardware.
+\end{itemize}
+
+\section{References}
+\begin{enumerate}
+    \item Reimers, N., \& Gurevych, I. (2019). \textit{Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks}. arXiv:1908.10084.
+    \item Thakur, N., et al. (2021). \textit{BEIR: A Heterogeneous Benchmark for Information Retrieval}. arXiv:2104.08663.
+    \item Cormack, G. V., et al. (2009). \textit{Reciprocal Rank Fusion reshuffles results}. Proceedings of the 32nd international ACM SIGIR conference.
+    \item Pydantic Documentation: \url{https://docs.pydantic.dev/}
+    \item Sentence-Transformers Documentation: \url{https://www.sbert.net/}
+\end{enumerate}
+
+\end{document}

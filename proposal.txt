@@ -1,0 +1,67 @@
+Semantic Research Paper Search Engine
+Yogesh Sharma (B22CH045)
+
+Motivation and Review
+Traditional keyword search fails to capture semantic
+similarity between documents and queries.
+Researchers often miss relevant papers because
+keyword matching cannot understand meaning.
+Recent advances in sentence embedding models (e.g.,
+models from Hugging Face) allow text to be
+represented as dense vectors, enabling semantic
+search.
+This project builds a semantic research paper search
+engine that retrieves papers based on meaning rather
+than exact keywords. The system will enforce data
+contracts to ensure dataset quality and consistency,
+and will be deployed with Docker and an interactive
+Streamlit interface.
+
+Methodology
+Collect research paper data containing title, abstract, authors,
+publication year, and paper ID from publicly available datasets.
+Define a data contract schema specifying required fields and
+data types.
+Embedding Generation: Generate dense vector representations
+using pretrained sentence embedding models from Hugging Face
+such as all-MiniLM-L6-v2.
+Semantic Retrieval: Store embeddings in a vector index (e.g.,
+FAISS) and perform similarity search to retrieve the top-k
+semantically similar documents for a given query.
+Interface & Deployment: Build an interactive search interface
+using Streamlit and deploy the entire pipeline in a reproducible
+environment using Docker.
+
+Novelty
+Datasets
+ArXiv dataset
+Semantic Scholar dataset
+CORD-19 dataset
+
+The novelty of this work lies in integrating semantic search with MLOps principles. Unlike typical embedding-based retrieval systems,
+this project introduces data contracts for dataset validation,
+metadata-aware ranking for contextual retrieval, and embedding
+drift monitoring. The system is implemented as a fully containerized
+ML pipeline with an interactive search interface, demonstrating a
+production-ready semantic retrieval framework.
+
+Expected Outcomes
+The goals of this project are:
+Retrieve semantically similar research papers.
+Improve search relevance over keyword
+search.
+Provide a reproducible ML pipeline with data
+validation.
+Demonstrate a deployable ML application.
+
+Metrics
+I wouldlike to extensively test my approach across a
+comprehensive suite of metrics
+Precision@k
+Recall@k
+nDCG (Normalized Discounted Cumulative
+Gain)
+query latency
+throughput
+
+

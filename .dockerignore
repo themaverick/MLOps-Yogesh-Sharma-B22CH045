@@ -1,0 +1,13 @@
+.venv
+.uv
+__pycache__
+*.pyc
+data/raw
+.git
+.ipynb_checkpoints
+notebooks
+B22CH045_proposal.pdf
+proposal.txt
+# Include data/processed because we want to bake the index into the image for speed
+# Skip training data to keep image slim
+data/training

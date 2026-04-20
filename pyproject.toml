@@ -1,0 +1,18 @@
+[project]
+name = "arxiv-search"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "arxiv>=3.0.0",
+    "faiss-cpu>=1.13.2",
+    "pandas>=3.0.2",
+    "pydantic[email]>=2.13.2",
+    "pytest>=9.0.3",
+    "pyyaml>=6.0.3",
+    "rank-bm25>=0.2.2",
+    "sentence-transformers>=5.4.1",
+    "streamlit>=1.56.0",
+    "tqdm>=4.67.3",
+]
