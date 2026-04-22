@@ -1,2 +1,1 @@
-# MLOps-Yogesh-Sharma-B22CH045
-Assignments for course CSL7210 ML-DL-Ops.
+Question2: mIOU: 0.8086 and mDICE: 0.8693
