@@ -1,0 +1,4 @@
+docker build --network=host -t bn-en-translator .
+
+docker run --network=host bn-en-translator
+
